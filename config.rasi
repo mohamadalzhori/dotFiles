@@ -1,0 +1,5 @@
+configuration {
+ modi: "window,drun,ssh,combi";
+ }
+
+@theme "/usr/share/rofi/themes/dmenu.rasi"
