@@ -1,3 +1,140 @@
+# Copyright (c) 2010 Aldo Cortesi
+# Copyright (c) 2010, 2014 dequis
+# Copyright (c) 2012 Randall Ma
+# Copyright (c) 2012-2014 Tycho Andersen
+# Copyright (c) 2012 Craig Barnes
+# Copyright (c) 2013 horsik
+# Copyright (c) 2013 Tao Sauvage
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
+from libqtile import bar, layout, widget, extension
+from libqtile.config import Click, Drag, Group, Key, Match, Screen
+from libqtile.lazy import lazy
+from libqtile.utils import guess_terminal
+from libqtile.widget import TextBox, Volume, Sep
+from libqtile import qtile
+from qtile_extras.widget.decorations import BorderDecoration
+
+import os
+import subprocess
+
+from libqtile import hook
+
+
+mod = "mod4"
+terminal = guess_terminal()
+
+@hook.subscribe.startup
+def autostart():
+    home = os.path.expanduser('~/.config/qtile/scripts/autostart.sh')
+    subprocess.Popen([home])
+
+
+colors  = [
+    ["#282a36", "#282a36"], # bg
+    ["#f8f8f2", "#f8f8f2"], # fg
+    ["#000000", "#000000"], # color01
+    ["#ff5555", "#ff5555"], # color02
+    ["#50fa7b", "#50fa7b"], # color03
+    ["#f1fa8c", "#f1fa8c"], # color04
+    ["#bd93f9", "#bd93f9"], # color05
+    ["#ff79c6", "#ff79c6"], # color06
+    ["#9aedfe", "#9aedfe"]  # color15
+    ]
+   
+
+
+
+keys = [
+    # A list of available commands that can be bound to keys can be found
+    # at https://docs.qtile.org/en/latest/manual/config/lazy.html
+    # Switch between windows
+    Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
+    Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
+    Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
+    Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
+    Key(['mod1'], "Tab", lazy.layout.next(), desc="Move window focus to other window"),
+    # Move windows between left/right columns or move up/down in current stack.
+    # Moving out of range in Columns layout will create new column.
+    Key([mod, "shift"], "h", lazy.layout.shuffle_left(), desc="Move window to the left"),
+    Key([mod, "shift"], "l", lazy.layout.shuffle_right(), desc="Move window to the right"),
+    Key([mod, "shift"], "j", lazy.layout.shuffle_down(), desc="Move window down"),
+    Key([mod, "shift"], "k", lazy.layout.shuffle_up(), desc="Move window up"),
+    # Grow windows. If current window is on the edge of screen and direction
+    # will be to screen edge - window would shrink.
+    Key([mod, "control"], "h", lazy.layout.grow_left(), desc="Grow window to the left"),
+    Key([mod, "control"], "l", lazy.layout.grow_right(), desc="Grow window to the right"),
+    Key([mod, "control"], "j", lazy.layout.grow_down(), desc="Grow window down"),
+    Key([mod, "control"], "k", lazy.layout.grow_up(), desc="Grow window up"),
+    Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
+    # Toggle between split and unsplit sides of stack.
+    # Split = all windows displayed
+    # Unsplit = 1 window displayed, like Max layout, but still with
+    # multiple stack panes
+    Key(
+        [mod, "shift"],
+        "Return",
+        lazy.layout.toggle_split(),
+        desc="Toggle between split and unsplit sides of stack",
+    ),
+    Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
+    # Toggle between different layouts as defined below
+    Key([mod], "space", lazy.next_layout(), desc="Toggle between layouts"),
+    Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
+    Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
+    Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
+    Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
+
+
+    # rofi integration
+
+Key(['mod1'],'space', lazy.spawn("/home/zhori/.local/bin/scripts/executor.sh")),
+    #Key(['mod1'],'m', lazy.spawn("rofi-wifi-menu.sh")),
+
+    # Function Keys
+
+    #Key([], "XF86AudioLowerVolume", lazy.spawn("amixer -q sset Master 5%-")),
+    #Key([], "XF86AudioRaiseVolume", lazy.spawn("amixer -q sset Master 5%+")),
+    #Key([], "XF86AudioMute", lazy.spawn("amixer -q sset Master toggle")),
+
+    # Use pavucontrol commands for audio control
+    Key([], "XF86AudioLowerVolume", lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ -5%")),
+    Key([], "XF86AudioRaiseVolume", lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ +5%")),
+    Key([], "XF86AudioMute", lazy.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle")),
+
+    # Switch to Arabic (Alt+RightShift)
+    Key(["mod1"], "Shift_R", lazy.spawn("setxkbmap ar")),
+
+    # Switch to English (Alt+LeftShift)
+    Key(["mod1"], "Shift_L", lazy.spawn("setxkbmap us")),
+
+
+    # Increase brightness
+    Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set +5%")),
+
+    # Decrease brightness
+    Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl set 5%-")),
+
+    # Launch Flameshot with the Print key
+    Key([], "Print", lazy.spawn("flameshot gui")),
 
 ]
 
@@ -62,7 +199,7 @@ screens = [
     Screen(
         top=bar.Bar(
             [
-
+            
         widget.Prompt(
                  font = "Ubuntu Mono",
                  fontsize=14,
@@ -88,46 +225,46 @@ screens = [
         widget.WindowName(
                  max_chars = 40
                  ),
-
-        widget.CPU(
-                 format = 'Cpu: {load_percent}%',
-                 mouse_callbacks={'Button1': lambda : qtile.cmd_spawn('gnome-system-monitor')},
-                 decorations=[
-                     BorderDecoration(
-                         colour = colors[4],
-                         border_width = [0, 0, 2, 0],
-                     )
-                 ],
-                 ),
-        widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
-        widget.Memory(
-                  mouse_callbacks={'Button1': lambda : qtile.cmd_spawn('gnome-system-monitor')},
-                 format = '{MemUsed: .0f}{mm}',
-                 fmt = 'Mem: {}',
-                 decorations=[
-                     BorderDecoration(
-                         colour = colors[8],
-                         border_width = [0, 0, 2, 0],
-                     )
-                 ],
-                 ),
-        widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
-        widget.DF(
-                 update_interval = 60,
-                 mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn('nautilus')},
-                 partition = '/',
-                 #format = '[{p}] {uf}{m} ({r:.0f}%)',
-                 format = '{uf}{m} free',
-                 fmt = 'Disk: {}',
-                 visible_on_warn = False,
-                 decorations=[
-                     BorderDecoration(
-                         colour = colors[5],
-                         border_width = [0, 0, 2, 0],
-                     )
-                 ],
-                 ),
-        widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
+       
+        #widget.CPU(
+        #         format = 'Cpu: {load_percent}%',
+        #         mouse_callbacks={'Button1': lambda : qtile.cmd_spawn('gnome-system-monitor')},
+        #         decorations=[
+        #             BorderDecoration(
+        #                 colour = colors[4],
+        #                border_width = [0, 0, 2, 0],
+        #             )
+        #         ],
+        #         ),
+        #widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
+        #widget.Memory(
+        #         mouse_callbacks={'Button1': lambda : qtile.cmd_spawn('gnome-system-monitor')},
+        #       format = '{MemUsed: .0f}{mm}',
+        #         fmt = 'Mem: {}',
+        #         decorations=[
+        #             BorderDecoration(
+        #                 colour = colors[8],
+        #                 border_width = [0, 0, 2, 0],
+        #             )
+        #         ],
+        #         ),
+        #widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
+        #widget.DF(
+        #         update_interval = 60,
+        #         mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn('nautilus')},
+        #         partition = '/',
+        #         #format = '[{p}] {uf}{m} ({r:.0f}%)',
+        #         format = '{uf}{m} free',
+        #         fmt = 'Disk: {}',
+        #         visible_on_warn = False,
+        #         decorations=[
+        #             BorderDecoration(
+        #                 colour = colors[5],
+        #                 border_width = [0, 0, 2, 0],
+        #             )
+        #         ],
+        #         ),
+        #widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
         widget.Volume(
                  fmt = 'Vol: {}',
                  decorations=[
@@ -138,8 +275,16 @@ screens = [
                  ],
                  ),
         widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
+        widget.Battery(
+        format="{char} {percent:2.0%}",
+        low_foreground="FF0000",
+        low_percentage=0.20,   
+        ),
+
+
+        widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
         widget.KeyboardLayout(
-                 fmt = 'Kbd: {}',
+                 fmt = '{}',
                  decorations=[
                      BorderDecoration(
                          colour = colors[8],
@@ -213,4 +358,3 @@ wl_input_rules = None
 #
 # We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
 # java that happens to be on java's whitelist.
-                         
