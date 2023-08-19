@@ -1,6 +1,19 @@
 #!/bin/sh
 
-feh --bg-scale ~/Pictures/Wallpapers/wallpaper3.jpg &
+
+# Check if redshift is already running
+if ! pgrep -x "redshift" > /dev/null; then
+    # Launch redshift if not running
+    redshift &
+fi
+
+
+feh --bg-scale ~/Pictures/Wallpapers/pop.jpg &
 nm-applet &
-dunst &
-sxhkd &
+#dunst &
+#sxhkd &
+blueman-applet &
+mailspring &
+copyq &
+picom &
+todoist &
