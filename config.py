@@ -32,12 +32,18 @@ from libqtile.utils import guess_terminal
 from libqtile.widget import TextBox, Volume, Sep
 from libqtile import qtile
 from qtile_extras.widget.decorations import BorderDecoration
-
+from libqtile.widget import GenPollText, base, TextBox
 import os
 import subprocess
-
 from libqtile import hook
+import time
+import imaplib
+import re
+from widgets.my_custom_widget import create_next_event_widget
 
+
+# Create the TextBox widget using the function from event_widget.py
+next_event = create_next_event_widget()
 
 mod = "mod4"
 terminal = guess_terminal()
@@ -51,7 +57,7 @@ def autostart():
 colors  = [
     ["#282a36", "#282a36"], # bg
     ["#f8f8f2", "#f8f8f2"], # fg
-    ["#000000", "#000000"], # color01
+    ["#000000", "#000000"], # colori01
     ["#ff5555", "#ff5555"], # color02
     ["#50fa7b", "#50fa7b"], # color03
     ["#f1fa8c", "#f1fa8c"], # color04
@@ -59,12 +65,14 @@ colors  = [
     ["#ff79c6", "#ff79c6"], # color06
     ["#9aedfe", "#9aedfe"]  # color15
     ]
-   
 
-
+def log_message(message):
+    with open('/tmp/qtile_debug.log', 'a') as log_file:
+        log_file.write(message + '\n')
 
 keys = [
     # A list of available commands that can be bound to keys can be found
+        #TextBox(text="|", padding=5),
     # at https://docs.qtile.org/en/latest/manual/config/lazy.html
     # Switch between windows
     Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
@@ -165,10 +173,17 @@ for i in groups:
     )
 
 
-
+@hook.subscribe.client_new
+def client_new(client):
+    if client.name == 'Mailspring':
+        client.togroup('5')
+    if client.name == 'Rhythmbox':
+        client.togroup('5')
+    if client.name == 'Todoist':
+        client.togroup('5')
 
 layouts = [
-        layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=2, margin=5),
+        layout.Columns(border_focus = "#ff3d33", border_normal = "#000000", border_width=3, margin=5),
     layout.Max(),
     # Try more layouts by unleashing below layouts.
     # layout.Stack(num_stacks=2),
@@ -192,8 +207,6 @@ widget_defaults = dict(
 extension_defaults = widget_defaults.copy()
 
 
-def spawn_htop():
-    qtile.cmd_spawn('rofi -show drun')
 
 screens = [
     Screen(
@@ -264,7 +277,17 @@ screens = [
         #             )
         #         ],
         #         ),
-        #widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
+   
+   next_event,
+
+    widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
+
+    TextBox(text="⏮", fontsize=20, mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('playerctl previous --player rhythmbox')}),
+    TextBox(text="⏸", fontsize=20, mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('playerctl play-pause --player rhythmbox')}),
+    TextBox(text="⏭", fontsize=20, mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('playerctl next --player rhythmbox')}),
+
+
+        widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
         widget.Volume(
                  fmt = 'Vol: {}',
                  decorations=[
@@ -277,7 +300,7 @@ screens = [
         widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
         widget.Battery(
         format="{char} {percent:2.0%}",
-        low_foreground="FF0000",
+        low_foreground="ffffff",
         low_percentage=0.20,   
         ),
 
@@ -294,7 +317,7 @@ screens = [
                  ),
         widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
         widget.Clock(
-                 format = "%a, %b %d - %H:%M",
+                 format = "%a, %b %d - %I:%M %p",
                  decorations=[
                      BorderDecoration(
                          colour = colors[3],
@@ -302,9 +325,9 @@ screens = [
                      )
                  ],
                  ),
-        widget.Spacer(length = 8),
+        #widget.Spacer(length = 8),
         widget.Systray(padding = 3),
-        widget.Spacer(length = 8),
+        #widget.Spacer(length = 8),
 
 
             ],
