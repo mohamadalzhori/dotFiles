@@ -9,9 +9,11 @@ case $- in
     *i*) ;;
       *) return;;
 esac
-############################## ALIASES ###################3
-alias cpc="xclip -sel c < "
 
+alias cpc="xclip -sel c < "
+alias rice="sudo vim .config/qtile/config.py"
+alias exe="sudo vim .local/bin/scripts/executor.sh"
+alias auto="sudo vim .config/qtile/scripts/autostart.sh"
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
