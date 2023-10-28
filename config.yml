@@ -1,0 +1,7 @@
+swipe:
+  3:
+    left:
+      command: "xdotool key Super+Page_Down"  # Switch to the previous group
+    right:
+      command: "xdotool key Super+Page_Up"  # Switch to the next group
+
