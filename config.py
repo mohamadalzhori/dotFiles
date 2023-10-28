@@ -39,10 +39,11 @@ from libqtile import hook
 import time
 import imaplib
 import re
+import threading
 from widgets.my_custom_widget import create_next_event_widget
 
-
 # Create the TextBox widget using the function from event_widget.py
+
 next_event = create_next_event_widget()
 
 mod = "mod4"
@@ -66,7 +67,7 @@ colors  = [
     ["#9aedfe", "#9aedfe"]  # color15
     ]
 
-def log_message(message):
+def log(message):
     with open('/tmp/qtile_debug.log', 'a') as log_file:
         log_file.write(message + '\n')
 
@@ -144,6 +145,11 @@ Key(['mod1'],'space', lazy.spawn("/home/zhori/.local/bin/scripts/executor.sh")),
     # Launch Flameshot with the Print key
     Key([], "Print", lazy.spawn("flameshot gui")),
 
+    Key([mod], "Shift_L", "s", lazy.spawn("flameshot gui")),
+
+    Key([mod], "v", lazy.spawn("copyq show")),
+
+    Key([], "F12", lazy.spawn("feh --randomize --bg-fill /home/zhori/Pictures/Wallpapers/")),
 ]
 
 groups = [Group(i) for i in "12345"]
@@ -165,11 +171,26 @@ for i in groups:
                 lazy.window.togroup(i.name, switch_group=True),
                 desc="Switch to & move focused window to group {}".format(i.name),
             ),
+            # Switch to the next group
+            Key(
+                [mod], "Page_Up",
+                 lazy.screen.next_group(),
+                 desc="Switch to the next group",
+             ),
+
+             # Switch to the previous group
+             Key(
+                 [mod], "Page_Down",
+                 lazy.screen.prev_group(),
+                 desc="Switch to the previous group",
+             ),
+
             # Or, use below if you prefer not to switch to that group.
             # # mod1 + shift + letter of group = move focused window to group
             # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
             #     desc="move focused window to group {}".format(i.name)),
-        ]
+
+            ]
     )
 
 
@@ -199,8 +220,8 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font="sans bold",
-    fontsize=12,
+    font="JetBrains Mono Bold",
+    fontsize=15,
     padding=3,
     foreground = "#ff3d33",
 )
@@ -212,11 +233,7 @@ screens = [
     Screen(
         top=bar.Bar(
             [
-            
-        widget.Prompt(
-                 font = "Ubuntu Mono",
-                 fontsize=14,
-        ),
+
         widget.GroupBox(
                  fontsize = 11,
                  margin_y = 3,
@@ -225,7 +242,7 @@ screens = [
                  padding_x = 3,
                  borderwidth = 3,
                  active = "FFFFFF",
-                 inactive = "000000",
+                 inactive = "282738",
                  rounded = False,
                  highlight_color = colors[2],
                  highlight_method = "line",
@@ -235,10 +252,30 @@ screens = [
                  #other_screen_border = colors[4],
                  ),
         widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
+
+        widget.CurrentLayout(
+                    fmt='{}',
+                ),
+
+        widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
         widget.WindowName(
                  max_chars = 40
                  ),
-       
+#        next_event,
+
+#        widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
+
+ #       widget.TextBox(
+  #          text = "YOU'RE PATHETIC",
+  #          ),
+
+
+  #      widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
+
+   #     widget.TextBox(
+   #         text = "إِنَّهُ كَانَ لا يُؤْمِنُ بِاللَّهِ الْعَظِيمِ",
+   #         foreground = "#3DED97",
+   #         ),
         #widget.CPU(
         #         format = 'Cpu: {load_percent}%',
         #         mouse_callbacks={'Button1': lambda : qtile.cmd_spawn('gnome-system-monitor')},
@@ -277,14 +314,24 @@ screens = [
         #             )
         #         ],
         #         ),
-   
-   next_event,
 
+        widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"), 
+
+    next_event,
+
+widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
+    widget.Pomodoro(),
+    
     widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
 
-    TextBox(text="⏮", fontsize=20, mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('playerctl previous --player rhythmbox')}),
-    TextBox(text="⏸", fontsize=20, mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('playerctl play-pause --player rhythmbox')}),
-    TextBox(text="⏭", fontsize=20, mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('playerctl next --player rhythmbox')}),
+# For Rhythmbox
+#    TextBox(text="⏮", fontsize=15, mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('playerctl previous --player rhythmbox')}),
+#    TextBox(text="⏸", fontsize=15, mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('playerctl play-pause --player rhythmbox')}),
+#    TextBox(text="⏭", fontsize=15, mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('playerctl next --player rhythmbox')}),
+
+    TextBox(text="⏮", fontsize=15, mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('mocp -r')}),
+    TextBox(text="⏸", fontsize=15, mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('mocp -G')}),
+    TextBox(text="⏭", fontsize=15, mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('mocp -f')}),
 
 
         widget.Sep(linewidth=2,padding=10,foreground="#FFFFFF"),
@@ -301,7 +348,7 @@ screens = [
         widget.Battery(
         format="{char} {percent:2.0%}",
         low_foreground="ffffff",
-        low_percentage=0.20,   
+        low_percentage=0.20,  
         ),
 
 
@@ -326,14 +373,13 @@ screens = [
                  ],
                  ),
         #widget.Spacer(length = 8),
-        widget.Systray(padding = 3),
+       widget.Systray(padding = 3),
         #widget.Spacer(length = 8),
 
 
             ],
-            24,
-            # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
-            # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
+            20,
+            background='#282738',
         ),
     ),
 ]
